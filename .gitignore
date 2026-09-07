@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+*.tsbuildinfo
+node_modules/
+dist/
+data/*.db
+data/*.db-*
+

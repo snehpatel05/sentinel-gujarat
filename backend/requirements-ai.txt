@@ -1,0 +1,7 @@
+# Install only on the RTX 5050 machine when enabling live AI workers.
+# The base API and dashboard do not require these packages.
+opencv-python>=4.10
+ultralytics>=8.3
+paddleocr>=2.9
+paddlepaddle-gpu>=3.0
+
