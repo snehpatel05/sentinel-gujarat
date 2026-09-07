@@ -19,7 +19,11 @@ class Settings(BaseSettings):
     @property
     def cors_origins(self) -> list[str]:
         configured = [origin.strip() for origin in self.sentinel_cors_origins.split(",") if origin.strip()]
-        required_local_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+        required_local_origins = [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "https://sentinel-gujarat.vercel.app",
+        ]
         return list(dict.fromkeys(required_local_origins + configured))
 
     @property
