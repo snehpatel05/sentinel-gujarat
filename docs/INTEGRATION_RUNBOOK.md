@@ -16,6 +16,16 @@ SENTINEL_VERIFY_TLS=true
 
 Never set `SENTINEL_VERIFY_TLS=false` unless organizers explicitly document a development certificate and your team has approved the risk.
 
+## Tomorrow's first command
+
+After putting the official values in the root `.env`, run this from the repository root:
+
+```powershell
+\.venv\Scripts\python.exe backend\live_preflight.py --require-gpu
+```
+
+This checks the catalogue response, prints which stream URLs were returned, and verifies CUDA before any RTSP worker is started. It does not publish camera control commands or expose credentials.
+
 ## Validate safely
 
 1. Start the backend and visit `GET /health`.
