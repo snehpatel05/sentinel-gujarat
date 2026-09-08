@@ -10,7 +10,12 @@
 Edit the root `.env` file with values **provided by organizers**:
 
 ```env
-SENTINEL_CATALOGUE_URL=http://ORGANIZER_HOST/api/ingest
+SENTINEL_CATALOGUE_URL=https://cctv.corp8.cloud/cameras.json
+SENTINEL_HLS_BASE_URL=https://cctv.corp8.cloud
+SENTINEL_RTSP_HOST=103.250.160.189
+SENTINEL_RTSP_PORT=8554
+SENTINEL_RTSP_PATH=/stream
+SENTINEL_WHEP_BASE_URL=http://103.250.160.189:8889
 SENTINEL_API_TOKEN=ONLY_IF_ORGANIZERS_ISSUE_ONE
 SENTINEL_USERNAME=ONLY_IF_REQUIRED
 SENTINEL_PASSWORD=ONLY_IF_REQUIRED
@@ -60,13 +65,14 @@ Expected:
 {
   "status": "ok",
   "live_mode": true,
-  "catalogue_url": "http://ORGANIZER_HOST/api/ingest"
+  "catalogue_url": "https://cctv.corp8.cloud/cameras.json"
 }
 ```
 
 ### 3. Sync Cameras (Read-Only)
 
-Call this endpoint to fetch and validate cameras:
+Call this endpoint to fetch and validate cameras. For this camera service, set
+`SENTINEL_CATALOGUE_URL=https://cctv.corp8.cloud/cameras.json`:
 
 ```powershell
 Invoke-WebRequest -Method POST http://127.0.0.1:8000/api/cameras/sync | Select-Object Content
@@ -112,6 +118,22 @@ Response includes real camera properties:
 ```
 
 ### 5. Start RTSP Inference (Optional)
+
+The camera portal currently requires browser sign-in for its catalogue page. The direct feed format is still usable immediately. Start with the confirmed feed `cam04`:
+
+```powershell
+.\.venv\Scripts\python.exe backend\live_preflight.py --probe-camera cam04 --require-gpu
+```
+
+The probe uses the credentials from `.env`, forces RTSP over TCP, reads one frame, checks CUDA, and does not print secrets. Use another camera ID such as `cam01` through `cam30` only after `cam04` succeeds.
+
+Then verify actual GPU inference:
+
+```powershell
+.\.venv\Scripts\python.exe backend\live_inference_smoke.py --camera cam04 --seconds 30
+```
+
+The first RTSP connection may take more than ten seconds. This smoke test is intentionally bounded and reports detections without publishing events.
 
 For GPU processing of camera streams, the `RtspInferenceWorker` is ready to accept streams:
 
@@ -170,7 +192,7 @@ If live integration is unstable, revert to mock:
 1. Edit `.env` and comment out `SENTINEL_CATALOGUE_URL`:
 
    ```env
-   # SENTINEL_CATALOGUE_URL=http://ORGANIZER_HOST/api/ingest
+  # SENTINEL_CATALOGUE_URL=https://cctv.corp8.cloud/cameras.json
    ```
 
 2. Restart backend

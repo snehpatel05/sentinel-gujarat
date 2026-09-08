@@ -1,12 +1,40 @@
+﻿# Secrets and local configuration
 .env
 .env.*
 !.env.example
+*.env
+*.env.*
+*.pem
+*.key
+*credentials*
+*secret*
+*token*
+*tunnel*
+cloudflared.yml
+cloudflared.yaml
+
+# Python
 .venv/
 __pycache__/
 *.py[cod]
-*.tsbuildinfo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Frontend and build output
 node_modules/
 dist/
+*.tsbuildinfo
+*.pt
+models/
+
+# Local data and logs
 data/*.db
 data/*.db-*
+*.log
+logs/
 
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/*.code-snippets

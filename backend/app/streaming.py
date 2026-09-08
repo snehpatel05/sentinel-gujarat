@@ -16,7 +16,7 @@ class ReconnectPolicy:
 
 def configure_opencv_rtsp_tcp() -> None:
     """Must execute before importing/initializing cv2 capture."""
-    os.environ.setdefault("OPENCV_FFMPEG_CAPTURE_OPTIONS", "rtsp_transport;tcp")
+    os.environ.setdefault("OPENCV_FFMPEG_CAPTURE_OPTIONS", "rtsp_transport;tcp|stimeout;5000000")
 
 
 def valid_pts_delta_ms(previous_pts: float | None, current_pts: float) -> float | None:

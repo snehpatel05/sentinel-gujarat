@@ -5,7 +5,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from .catalogue import CatalogueError, fetch_catalogue, mock_catalogue
 from .config import get_settings
-from .models import Alert, Camera, DetectionEvent, WatchlistEntry, WatchlistKind
+from .models import Alert, Camera, DetectionEvent, StreamUrls, WatchlistEntry, WatchlistKind
 
 
 class State:
@@ -63,7 +63,12 @@ def public_config():
 
 @app.get("/api/cameras", response_model=list[Camera])
 def cameras():
-    return list(State.cameras.values())
+    return [_public_camera(camera) for camera in State.cameras.values()]
+
+
+def _public_camera(camera: Camera) -> Camera:
+    """Never send credential-bearing RTSP URLs to the browser."""
+    return camera.model_copy(update={"streams": StreamUrls(hls=camera.streams.hls, whep=camera.streams.whep)})
 
 
 @app.post("/api/cameras/sync", response_model=list[Camera])
@@ -73,7 +78,7 @@ async def sync_cameras():
     except CatalogueError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     State.cameras = {camera.id: camera for camera in synced}
-    return synced
+    return [_public_camera(camera) for camera in synced]
 
 
 @app.get("/api/watchlist", response_model=list[WatchlistEntry])

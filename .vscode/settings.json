@@ -1,0 +1,47 @@
+{
+  "files.exclude": {
+    "**/.env": true,
+    "**/.env.*": true,
+    "**/*.env": true,
+    "**/*.env.*": true,
+    "**/*.pem": true,
+    "**/*.key": true,
+    "**/*credentials*": true,
+    "**/*secret*": true,
+    "**/*token*": true,
+    "**/*tunnel*": true,
+    "**/__pycache__": true,
+    "**/node_modules": true,
+    "**/dist": true
+  },
+  "search.exclude": {
+    "**/.env": true,
+    "**/.env.*": true,
+    "**/*.env": true,
+    "**/*.env.*": true,
+    "**/*.pem": true,
+    "**/*.key": true,
+    "**/*credentials*": true,
+    "**/*secret*": true,
+    "**/*token*": true,
+    "**/*tunnel*": true,
+    "**/__pycache__": true,
+    "**/node_modules": true,
+    "**/dist": true
+  },
+  "files.watcherExclude": {
+    "**/.env": true,
+    "**/.env.*": true,
+    "**/*.env": true,
+    "**/*.env.*": true,
+    "**/*.pem": true,
+    "**/*.key": true,
+    "**/*credentials*": true,
+    "**/*secret*": true,
+    "**/*token*": true,
+    "**/*tunnel*": true,
+    "**/__pycache__": true,
+    "**/node_modules": true,
+    "**/dist": true
+  }
+}

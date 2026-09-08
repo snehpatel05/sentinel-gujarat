@@ -115,7 +115,7 @@ See [docs/ONLINE_DEPLOYMENT.md](docs/ONLINE_DEPLOYMENT.md) for details.
 Set only the values supplied by organizers in `.env`:
 
 ```env
-SENTINEL_CATALOGUE_URL=http://HOST/api/ingest
+SENTINEL_CATALOGUE_URL=https://cctv.corp8.cloud/cameras.json
 SENTINEL_API_TOKEN=...
 SENTINEL_USERNAME=...
 SENTINEL_PASSWORD=...
@@ -129,6 +129,22 @@ Then run:
 ```
 
 This validates the catalogue, lists available stream URLs, and verifies CUDA before starting the RTSP worker.
+
+If the organizer's camera portal returns an HTML sign-in page instead of JSON, test a direct feed without using the catalogue:
+
+```powershell
+.\.venv\Scripts\python.exe backend\live_preflight.py --probe-camera cam04 --require-gpu
+```
+
+The direct probe builds the credentialed RTSP URL privately from `.env`, forces TCP, reads one frame, and never prints the URL or password.
+
+Run a bounded YOLO GPU smoke test after the probe succeeds. The first connection can take several seconds to open, so use at least 30 seconds:
+
+```powershell
+.\.venv\Scripts\python.exe backend\live_inference_smoke.py --camera cam04 --seconds 30
+```
+
+This reports only the camera ID, GPU name, sampled frame count, and detection count. It does not publish alerts or expose credentials.
 
 ---
 
