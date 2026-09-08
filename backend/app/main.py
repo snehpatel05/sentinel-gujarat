@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from .catalogue import CatalogueError, fetch_catalogue, mock_catalogue
+from .catalogue import CatalogueError, configured_streams, fetch_catalogue, mock_catalogue
 from .config import get_settings
 from .models import Alert, Camera, DetectionEvent, DetectionIngest, StreamUrls, WatchlistEntry, WatchlistKind
 
@@ -109,7 +109,15 @@ def ingest_event(event: DetectionIngest, x_sentinel_ingest_token: str | None = H
     if not expected or x_sentinel_ingest_token != expected:
         raise HTTPException(status_code=401, detail="Invalid ingest token")
     if event.camera_id not in State.cameras:
-        raise HTTPException(status_code=404, detail="Unknown camera")
+        settings = get_settings()
+        State.cameras[event.camera_id] = Camera(
+            id=event.camera_id,
+            name=f"Sentinel {event.camera_id}",
+            location=event.location,
+            status="live",
+            streams=configured_streams(event.camera_id, settings),
+            updated_at=event.occurred_at,
+        )
     match = next((entry for entry in State.watchlist.values() if entry.active and entry.plate and entry.plate == event.plate), None)
     alert_id = None
     if match:
