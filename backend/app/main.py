@@ -1,11 +1,11 @@
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from .catalogue import CatalogueError, fetch_catalogue, mock_catalogue
 from .config import get_settings
-from .models import Alert, Camera, DetectionEvent, StreamUrls, WatchlistEntry, WatchlistKind
+from .models import Alert, Camera, DetectionEvent, DetectionIngest, StreamUrls, WatchlistEntry, WatchlistKind
 
 
 class State:
@@ -100,6 +100,24 @@ def events(limit: int = 100):
 @app.get("/api/alerts", response_model=list[Alert])
 def alerts():
     return sorted(State.alerts, key=lambda alert: alert.created_at, reverse=True)
+
+
+@app.post("/api/events/ingest", response_model=DetectionEvent, status_code=201)
+def ingest_event(event: DetectionIngest, x_sentinel_ingest_token: str | None = Header(default=None)):
+    """Accept compact edge metadata; never accept frames or camera credentials."""
+    expected = get_settings().sentinel_ingest_token
+    if not expected or x_sentinel_ingest_token != expected:
+        raise HTTPException(status_code=401, detail="Invalid ingest token")
+    if event.camera_id not in State.cameras:
+        raise HTTPException(status_code=404, detail="Unknown camera")
+    match = next((entry for entry in State.watchlist.values() if entry.active and entry.plate and entry.plate == event.plate), None)
+    alert_id = None
+    if match:
+        alert_id = str(uuid4())
+        State.alerts.append(Alert(id=alert_id, severity=match.risk_level, title="Watchlist entity detected", description=f"{event.plate} matched {match.label}.", camera_id=event.camera_id, entity_id=event.entity_id, created_at=event.occurred_at))
+    saved = DetectionEvent(id=str(uuid4()), alert_id=alert_id, **event.model_dump())
+    State.events.append(saved)
+    return saved
 
 
 @app.get("/api/routes/{entity_id}", response_model=list[DetectionEvent])

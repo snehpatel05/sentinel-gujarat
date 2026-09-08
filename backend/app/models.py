@@ -63,6 +63,17 @@ class DetectionEvent(BaseModel):
     alert_id: str | None = None
 
 
+class DetectionIngest(BaseModel):
+    camera_id: str
+    entity_id: str
+    entity_type: str = "object"
+    plate: str | None = None
+    occurred_at: datetime
+    source_pts_ms: float
+    confidence: float = Field(ge=0, le=1)
+    location: GeoPoint
+
+
 class Alert(BaseModel):
     id: str
     severity: str

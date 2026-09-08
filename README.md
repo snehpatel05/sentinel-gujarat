@@ -146,6 +146,15 @@ Run a bounded YOLO GPU smoke test after the probe succeeds. The first connection
 
 This reports only the camera ID, GPU name, sampled frame count, and detection count. It does not publish alerts or expose credentials.
 
+Run the complete live detector and tracker locally:
+
+```powershell
+python -m pip install -r backend/requirements-ai.txt
+.\.venv\Scripts\python.exe backend\live_pipeline.py --camera cam04 --seconds 60
+```
+
+Add `--ocr` to enable EasyOCR. Add `--publish --latitude <LAT> --longitude <LNG>` only after the local API is running and `SENTINEL_INGEST_TOKEN` is set in `.env`; events are rate-limited per tracked entity.
+
 ---
 
 ## API Reference
@@ -161,6 +170,7 @@ This reports only the camera ID, GPU name, sampled frame count, and detection co
 ### Detections & Alerts
 - `GET /api/events` — Detection event history  
 - `GET /api/alerts` — Priority alerts with watchlist matches
+- `POST /api/events/ingest` — Token-protected edge detection metadata ingestion
 
 ### Tracking & Routes
 - `GET /api/routes/{entity_id}` — Reconstructed GIS path for entity

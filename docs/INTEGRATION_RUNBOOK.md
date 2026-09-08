@@ -135,6 +135,29 @@ Then verify actual GPU inference:
 
 The first RTSP connection may take more than ten seconds. This smoke test is intentionally bounded and reports detections without publishing events.
 
+## Detection, Tracking, and Publishing
+
+Run the complete local pipeline after the smoke test:
+
+```powershell
+python -m pip install -r backend/requirements-ai.txt
+.\.venv\Scripts\python.exe backend\live_pipeline.py --camera cam04 --seconds 60
+```
+
+This runs YOLO on CUDA and ByteTrack locally. OCR is opt-in:
+
+```powershell
+.\.venv\Scripts\python.exe backend\live_pipeline.py --camera cam04 --seconds 60 --ocr
+```
+
+To publish metadata to the local API, set a private `SENTINEL_INGEST_TOKEN` in `.env`, start FastAPI, and provide the camera coordinates:
+
+```powershell
+.\.venv\Scripts\python.exe backend\live_pipeline.py --camera cam04 --seconds 60 --publish --latitude 23.03 --longitude 72.56
+```
+
+The pipeline sends metadata only. It never uploads frames, RTSP URLs, or credentials. Publishing is rate-limited per tracked entity and watchlist matching occurs inside the API.
+
 For GPU processing of camera streams, the `RtspInferenceWorker` is ready to accept streams:
 
 ```python

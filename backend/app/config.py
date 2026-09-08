@@ -7,6 +7,7 @@ class Settings(BaseSettings):
 
     sentinel_catalogue_url: str | None = None
     sentinel_api_token: str | None = None
+    sentinel_ingest_token: str | None = None
     sentinel_username: str | None = None
     sentinel_password: str | None = None
     sentinel_hls_base_url: str = "https://cctv.corp8.cloud"
