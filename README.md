@@ -4,13 +4,57 @@
 
 **A GPU-assisted CCTV operations console for the Sentinel Gujarat challenge.**
 
-[![Frontend](https://img.shields.io/badge/frontend-Vercel-111827?logo=vercel)](https://sentinel-gujaratvercel.app)
+[![Frontend](https://img.shields.io/badge/frontend-Vercel-111827?logo=vercel)](https://sentinel-gujarat.vercel.app)
 [![Backend](https://img.shields.io/badge/backend-Render-46e3b7?logo=render)](https://sentinel-gujaratvercel-ggt2.onrender.com)
 [![Python](https://img.shields.io/badge/Python-3.14-3776ab?logo=python)](https://www.python.org/)
 [![React](https://img.shields.io/badge/React-TypeScript-149eca?logo=react)](https://react.dev/)
 [![CUDA](https://img.shields.io/badge/CUDA-RTX%205050-76b900?logo=nvidia)](https://developer.nvidia.com/cuda-toolkit)
+[![Tests](https://img.shields.io/badge/tests-pytest-0a9edc)](#verification)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
+
+**[Live Demo](https://sentinel-gujarat.vercel.app)** · **[API Docs](http://127.0.0.1:8000/docs)** · **[Integration Runbook](docs/INTEGRATION_RUNBOOK.md)** · **[Changelog](CHANGELOG.md)**
 
 </div>
+
+---
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Current Status](#current-status)
+- [What This Project Does](#what-this-project-does)
+- [Two Operating Modes](#two-operating-modes)
+- [Use the Local Model](#use-the-local-model)
+- [Camera Feed Configuration](#camera-feed-configuration)
+- [Why the Live Website May Not Show Real Cameras](#why-the-live-website-may-not-show-real-cameras)
+- [API Surface](#api-surface)
+- [Verification](#verification)
+- [Project Layout](#project-layout)
+- [Security Rules](#security-rules)
+- [Documentation](#documentation)
+- [License](#license)
+
+---
+
+## Quick Start
+
+**Just want to see it working?**
+Open the [live demo](https://sentinel-gujarat.vercel.app) — it runs on seeded data and needs no setup.
+
+**Want to run the real GPU pipeline locally?**
+
+```powershell
+# 1. Start the backend
+.\.venv\Scripts\Activate.ps1
+$env:PYTHONPATH = "backend"
+python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
+
+# 2. Start the dashboard (second terminal)
+cd frontend && npm install && npm run dev
+```
+
+Then open **http://127.0.0.1:5173**. Full walkthrough with GPU checks, OCR, and publishing is in [Use the Local Model](#use-the-local-model).
 
 ---
 
@@ -18,14 +62,14 @@
 
 | Area | Status | What it means |
 |---|---|---|
-| Formal dashboard UI | Ready | Operations-console frontend is built and published |
-| Local FastAPI service | Ready | Runs on `127.0.0.1:8000` |
-| Local GPU model | Ready | YOLO + ByteTrack verified on the RTX 5050 |
-| Event ingestion | Ready | Token-protected metadata endpoint is implemented |
-| Deployed demonstration | Ready | Vercel + Render serve seeded demonstration data |
-| Organizer camera gateway | Blocked upstream | Gateway currently returns `502 Bad Gateway` and RTSP ports are unreachable |
+| Formal dashboard UI | ✅ Ready | Operations-console frontend is built and published |
+| Local FastAPI service | ✅ Ready | Runs on `127.0.0.1:8000` |
+| Local GPU model | ✅ Ready | YOLO + ByteTrack verified on the RTX 5050 |
+| Event ingestion | ✅ Ready | Token-protected metadata endpoint is implemented |
+| Deployed demonstration | ✅ Ready | Vercel + Render serve seeded demonstration data |
+| Organizer camera gateway | ⏳ Blocked upstream | Gateway currently returns `502 Bad Gateway` and RTSP ports are unreachable |
 
-**Important:** the project code is ready. Real camera results cannot appear until the organizer gateway becomes reachable again. That is an external service issue, not a local model failure.
+> **Important:** the project code is ready. Real camera results cannot appear until the organizer gateway becomes reachable again. That is an external service issue, not a local model failure.
 
 ---
 
@@ -59,7 +103,8 @@ Operations dashboard
 
 The system sends compact detection metadata to the API. It does not upload or publish raw video frames.
 
-### Example Detection Event
+<details>
+<summary><strong>Example detection event (JSON)</strong></summary>
 
 ```json
 {
@@ -77,9 +122,9 @@ The system sends compact detection metadata to the API. It does not upload or pu
 }
 ```
 
-### Example Operator Outcome
+</details>
 
-A detected plate that matches an active watchlist item becomes:
+**Example operator outcome** — a detected plate that matches an active watchlist item becomes:
 
 ```text
 Detection -> watchlist match -> priority alert -> map event -> route history
@@ -98,7 +143,7 @@ Browser
   -> Seeded cameras, events, alerts, and routes
 ```
 
-Open: **https://sentinel-gujaratvercel.app**
+Open: **[sentinel-gujarat.vercel.app](https://sentinel-gujarat.vercel.app)**
 
 This mode is designed for a stable presentation. It works without your laptop, private credentials, GPU, or camera gateway.
 
@@ -122,7 +167,8 @@ This mode is the technically meaningful version. It uses the local GPU and is re
 
 ## Use the Local Model
 
-### Start the local API
+<details>
+<summary><strong>Start the local API</strong></summary>
 
 From the repository root:
 
@@ -138,7 +184,10 @@ Check it:
 Invoke-WebRequest http://127.0.0.1:8000/health
 ```
 
-### Start the dashboard
+</details>
+
+<details>
+<summary><strong>Start the dashboard</strong></summary>
 
 Open a second terminal:
 
@@ -152,7 +201,10 @@ Open **http://127.0.0.1:5173**.
 
 The local frontend uses `frontend/.env.local` and points to `http://127.0.0.1:8000`.
 
-### Check one camera
+</details>
+
+<details>
+<summary><strong>Check one camera</strong></summary>
 
 Use a camera ID such as `cam04`:
 
@@ -169,7 +221,10 @@ GPU: ready (NVIDIA GeForce RTX 5050 Laptop GPU)
 Direct RTSP preflight passed.
 ```
 
-### Run the local detector without publishing
+</details>
+
+<details>
+<summary><strong>Run the local detector without publishing</strong></summary>
 
 This is the safest normal test:
 
@@ -179,7 +234,10 @@ This is the safest normal test:
 
 It runs YOLO and ByteTrack locally and reports frames and tracked objects. It does not publish events.
 
-### Run optional OCR
+</details>
+
+<details>
+<summary><strong>Run optional OCR</strong></summary>
 
 ```powershell
 .\.venv\Scripts\python.exe backend\live_pipeline.py --camera cam04 --seconds 60 --ocr
@@ -187,7 +245,10 @@ It runs YOLO and ByteTrack locally and reports frames and tracked objects. It do
 
 The first OCR run may download model files. Those files remain local and are ignored by Git.
 
-### Publish detection metadata locally
+</details>
+
+<details>
+<summary><strong>Publish detection metadata locally</strong></summary>
 
 Set this only in your private `.env`:
 
@@ -208,7 +269,10 @@ Start the API, then run:
 
 The API creates events and checks active watchlist entries. Publishing requires the token and fails closed when it is missing.
 
-### Stop everything
+</details>
+
+<details>
+<summary><strong>Stop everything</strong></summary>
 
 In each running terminal, press:
 
@@ -218,23 +282,23 @@ Ctrl+C
 
 The virtual environment itself does not run in the background after VS Code closes.
 
+</details>
+
 ---
 
 ## Camera Feed Configuration
 
-The organizer-provided format is:
+Camera streams are provided by the organizer in three formats — HLS, RTSP, and WHEP — keyed by camera ID (`cam01` through `cam30`).
 
-```text
-HLS:  https://cctv.corp8.cloud/<id>/index.m3u8
-RTSP: rtsp://<encoded-email>:<password>@103.250.160.189:8554/stream/<id>
-WHEP: http://103.250.160.189:8889/stream/<id>/whep
-```
+The actual host, ports, and credentials are organizer-issued and environment-specific, so they are kept out of this public README. To configure them locally:
 
-Camera IDs are expected to look like `cam01` through `cam30`.
+1. Copy `.env.example` to `.env`
+2. Fill in the organizer-provided values (catalogue URL, RTSP host/port, WHEP base URL, credentials)
+3. Never commit or paste `.env` contents anywhere, including chat or issues
 
-The local `.env` contains the private username and password. The application percent-encodes the email address and never sends the credential-bearing RTSP URL to the browser.
+The application percent-encodes the email address used for RTSP auth and never sends the credential-bearing RTSP URL to the browser — only HLS/WHEP URLs reach the frontend.
 
-Do not commit or paste `.env` contents. Use `.env.example` as the safe template.
+Full field-by-field configuration steps are in the [Integration Runbook](docs/INTEGRATION_RUNBOOK.md).
 
 ---
 
@@ -242,13 +306,7 @@ Do not commit or paste `.env` contents. Use `.env.example` as the safe template.
 
 The public dashboard and the live camera gateway are separate services.
 
-The current external failure is:
-
-```text
-https://cctv.corp8.cloud/cameras.json -> 502 Bad Gateway
-103.250.160.189:8554 -> unreachable from the current network
-103.250.160.189:8889 -> unreachable from the current network
-```
+As of the latest check, the organizer's camera catalogue endpoint is returning `502 Bad Gateway`, and the RTSP/WHEP ports are unreachable from the current network. This is tracked as an upstream/organizer-side issue, not a defect in this codebase.
 
 When the organizer gateway is restored, retry:
 
@@ -314,18 +372,18 @@ backend/
 │   ├── catalogue.py       # Catalogue adapter and stream URL generation
 │   ├── config.py          # Environment-backed settings
 │   ├── inference.py       # RTSP worker with PTS sampling
-│   ├── main.py            # FastAPI API and event ingestion
-│   ├── models.py          # API data models
-│   └── streaming.py       # TCP transport and reconnect policy
+│   ├── main.py             # FastAPI API and event ingestion
+│   ├── models.py           # API data models
+│   └── streaming.py        # TCP transport and reconnect policy
 ├── live_pipeline.py       # YOLO + ByteTrack + optional OCR runner
 ├── live_preflight.py      # Camera and CUDA readiness checks
 └── tests/                 # Backend tests
 frontend/
 ├── src/
-│   ├── App.tsx            # Operations console
-│   ├── OperationalMap.tsx # Map and camera markers
-│   ├── VideoPreview.tsx   # HLS preview
-│   └── styles.css         # Formal console theme
+│   ├── App.tsx             # Operations console
+│   ├── OperationalMap.tsx  # Map and camera markers
+│   ├── VideoPreview.tsx    # HLS preview
+│   └── styles.css          # Formal console theme
 └── package.json
 ```
 
