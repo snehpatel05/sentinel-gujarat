@@ -19,3 +19,9 @@ def test_opencv_capture_uses_tcp_and_bounded_connect_timeout(monkeypatch):
     assert "rtsp_transport;tcp" in __import__("os").environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"]
     assert "stimeout;5000000" in __import__("os").environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"]
 
+
+def test_reconnect_state_can_restart_source_pts_from_zero():
+    assert valid_pts_delta_ms(5000, 0) is None
+    assert valid_pts_delta_ms(None, 0) is None
+    assert valid_pts_delta_ms(0, 120) == 120
+

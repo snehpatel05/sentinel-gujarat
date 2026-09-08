@@ -49,6 +49,8 @@ class RtspInferenceWorker:
                 log.warning("camera=%s unable to open; retry in %.1fs", self.camera_id, delay)
                 time.sleep(delay); continue
             attempt = 0
+            previous_pts = None
+            last_processed_pts = None
             try:
                 while not self._stopped:
                     ok, frame = capture.read()

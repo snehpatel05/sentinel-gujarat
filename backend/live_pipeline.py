@@ -47,48 +47,54 @@ def main() -> None:
     frames = 0
     tracked = 0
     published = 0
+    errors = 0
     last_published: dict[str, float] = {}
     lock = threading.Lock()
 
     def on_frame(frame: object, metadata: FrameMetadata) -> None:
-        nonlocal frames, tracked, published
-        result = model.predict(frame, device=0, verbose=False)[0]
-        detections = tracker.update_with_detections(sv.Detections.from_ultralytics(result))
-        labels = result.names
-        plate = None
-        if reader is not None:
-            text = reader.readtext(frame, detail=0, paragraph=False)
-            matches = [re.sub(r"[^A-Z0-9]", "", value.upper()) for value in text]
-            plate = next((value for value in matches if len(value) >= 4), None)
-        now = time.monotonic()
-        with lock:
-            frames += 1
-            tracked += len(detections)
-        if not args.publish:
-            return
-        confidences = detections.confidence if detections.confidence is not None else []
-        for index, confidence in enumerate(confidences):
-            track_id = detections.tracker_id[index] if detections.tracker_id is not None else None
-            class_id = detections.class_id[index] if detections.class_id is not None else None
-            entity_id = f"{args.camera}:{track_id if track_id is not None else index}"
-            if now - last_published.get(entity_id, 0) < 2:
-                continue
-            payload = {
-                "camera_id": args.camera,
-                "entity_id": entity_id,
-                "entity_type": str(labels.get(int(class_id), "object")) if class_id is not None else "object",
-                "plate": plate,
-                "occurred_at": datetime.now(timezone.utc).isoformat(),
-                "source_pts_ms": metadata.pts_ms,
-                "confidence": float(confidence),
-                "location": {"latitude": args.latitude, "longitude": args.longitude},
-            }
-            headers = {"X-Sentinel-Ingest-Token": settings.sentinel_ingest_token or ""}
-            response = requests.post(f"{args.api_url.rstrip('/')}/api/events/ingest", json=payload, headers=headers, timeout=5)
-            response.raise_for_status()
-            last_published[entity_id] = now
+        nonlocal frames, tracked, published, errors
+        try:
+            result = model.predict(frame, device=0, verbose=False)[0]
+            detections = tracker.update_with_detections(sv.Detections.from_ultralytics(result))
+            labels = result.names
+            plate = None
+            if reader is not None:
+                text = reader.readtext(frame, detail=0, paragraph=False)
+                matches = [re.sub(r"[^A-Z0-9]", "", value.upper()) for value in text]
+                plate = next((value for value in matches if len(value) >= 4), None)
+            now = time.monotonic()
             with lock:
-                published += 1
+                frames += 1
+                tracked += len(detections)
+            if not args.publish:
+                return
+            confidences = detections.confidence if detections.confidence is not None else []
+            for index, confidence in enumerate(confidences):
+                track_id = detections.tracker_id[index] if detections.tracker_id is not None else None
+                class_id = detections.class_id[index] if detections.class_id is not None else None
+                entity_id = f"{args.camera}:{track_id if track_id is not None else index}"
+                if now - last_published.get(entity_id, 0) < 2:
+                    continue
+                payload = {
+                    "camera_id": args.camera,
+                    "entity_id": entity_id,
+                    "entity_type": str(labels.get(int(class_id), "object")) if class_id is not None else "object",
+                    "plate": plate,
+                    "occurred_at": datetime.now(timezone.utc).isoformat(),
+                    "source_pts_ms": metadata.pts_ms,
+                    "confidence": float(confidence),
+                    "location": {"latitude": args.latitude, "longitude": args.longitude},
+                }
+                headers = {"X-Sentinel-Ingest-Token": settings.sentinel_ingest_token or ""}
+                response = requests.post(f"{args.api_url.rstrip('/')}/api/events/ingest", json=payload, headers=headers, timeout=5)
+                response.raise_for_status()
+                last_published[entity_id] = now
+                with lock:
+                    published += 1
+        except Exception as exc:
+            with lock:
+                errors += 1
+            print(f"Frame processing error: {type(exc).__name__}: {exc}")
 
     worker = RtspInferenceWorker(args.camera, stream, on_frame, sample_fps=settings.sentinel_inference_sample_fps)
     thread = threading.Thread(target=worker.run, daemon=True)
@@ -104,6 +110,7 @@ def main() -> None:
     print(f"Frames: {frames}")
     print(f"Tracked objects: {tracked}")
     print(f"Published events: {published}")
+    print(f"Processing errors: {errors}")
     if frames == 0:
         raise SystemExit("No frames reached the detector")
     print("Live detection pipeline completed.")
