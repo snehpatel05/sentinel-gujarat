@@ -1,8 +1,10 @@
-# Sentinel Command
+# 🛰️ Sentinel Command
 
 <div align="center">
 
-**A GPU-assisted CCTV operations console for the Sentinel Gujarat challenge.**
+### GPU-Accelerated CCTV Operations Console — Built for the Sentinel Gujarat Challenge
+
+*From raw camera feeds to actionable intelligence — real-time detection, tracking, and watchlist alerting on a single operator dashboard.*
 
 [![Frontend](https://img.shields.io/badge/frontend-Vercel-111827?logo=vercel)](https://sentinel-gujarat.vercel.app)
 [![Backend](https://img.shields.io/badge/backend-Render-46e3b7?logo=render)](https://sentinel-gujaratvercel-ggt2.onrender.com)
@@ -13,34 +15,49 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
 
-**[Live Demo](https://sentinel-gujarat.vercel.app)** · **[API Docs](http://127.0.0.1:8000/docs)** · **[Integration Runbook](docs/INTEGRATION_RUNBOOK.md)** · **[Changelog](CHANGELOG.md)**
+**[🚀 Live Demo](https://sentinel-gujarat.vercel.app)** &nbsp;·&nbsp; **[📘 API Docs](http://127.0.0.1:8000/docs)** &nbsp;·&nbsp; **[📋 Integration Runbook](docs/INTEGRATION_RUNBOOK.md)** &nbsp;·&nbsp; **[📝 Changelog](CHANGELOG.md)**
+
+**[🎥 Watch the Demo Video](https://drive.google.com/file/d/11qh_75hrGCSBG4pWCxIESvZaGnvrL5eZ/view?usp=sharing)** &nbsp;·&nbsp; **[📊 View the Presentation](https://docs.google.com/presentation/d/1Zi-B_JZkmJHgAuOBxtf6LLU_IGVB-eGJ/edit?usp=sharing)**
 
 </div>
 
 ---
 
-## Table of Contents
+## ✨ Why Sentinel Command
 
-- [Quick Start](#quick-start)
-- [Current Status](#current-status)
-- [What This Project Does](#what-this-project-does)
-- [Two Operating Modes](#two-operating-modes)
-- [Use the Local Model](#use-the-local-model)
-- [Camera Feed Configuration](#camera-feed-configuration)
-- [Why the Live Website May Not Show Real Cameras](#why-the-live-website-may-not-show-real-cameras)
-- [API Surface](#api-surface)
-- [Verification](#verification)
-- [Project Layout](#project-layout)
-- [Security Rules](#security-rules)
-- [Documentation](#documentation)
-- [License](#license)
+Most hackathon CCTV demos stop at "we can draw a box around a person." Sentinel Command goes further — it turns raw RTSP camera streams into **structured, watchlist-aware intelligence**, running real object detection and tracking on local GPU hardware, and surfaces it through a console built for an actual operator, not a judge's screenshot.
+
+- 🎯 **Real GPU inference** — YOLO detection + ByteTrack identity tracking, verified live on an RTX 5050
+- 🔒 **Privacy-first pipeline** — raw video never leaves the edge; only compact detection metadata is transmitted
+- 🚨 **Watchlist-to-alert in one path** — a plate match becomes a prioritized alert with a live map location and route history
+- 🖥️ **Dual-mode design** — a stable seeded demo for presentation, and a fully live local mode for real GPU processing
+- 🧪 **Tested, not just built** — backend test suite covers catalogue parsing, stream URL generation, RTSP timing, reconnects, and ingestion
 
 ---
 
-## Quick Start
+## 📚 Table of Contents
+
+- [Quick Start](#-quick-start)
+- [Current Status](#-current-status)
+- [Demo & Media](#-demo--media)
+- [What This Project Does](#-what-this-project-does)
+- [Two Operating Modes](#-two-operating-modes)
+- [Use the Local Model](#-use-the-local-model)
+- [Camera Feed Configuration](#-camera-feed-configuration)
+- [Why the Live Website May Not Show Real Cameras](#-why-the-live-website-may-not-show-real-cameras)
+- [API Surface](#-api-surface)
+- [Verification](#-verification)
+- [Project Layout](#-project-layout)
+- [Security Rules](#-security-rules)
+- [Documentation](#-documentation)
+- [License](#-license)
+
+---
+
+## 🚀 Quick Start
 
 **Just want to see it working?**
-Open the [live demo](https://sentinel-gujarat.vercel.app) — it runs on seeded data and needs no setup.
+Open the **[live demo](https://sentinel-gujarat.vercel.app)** — it runs on seeded data and needs no setup.
 
 **Want to run the real GPU pipeline locally?**
 
@@ -54,14 +71,14 @@ python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 cd frontend && npm install && npm run dev
 ```
 
-Then open **http://127.0.0.1:5173**. Full walkthrough with GPU checks, OCR, and publishing is in [Use the Local Model](#use-the-local-model).
+Then open **http://127.0.0.1:5173**. Full walkthrough with GPU checks, OCR, and publishing is in [Use the Local Model](#-use-the-local-model).
 
 ---
 
-## Current Status
+## 📊 Current Status
 
 | Area | Status | What it means |
-|---|---|---|
+|---|:---:|---|
 | Formal dashboard UI | ✅ Ready | Operations-console frontend is built and published |
 | Local FastAPI service | ✅ Ready | Runs on `127.0.0.1:8000` |
 | Local GPU model | ✅ Ready | YOLO + ByteTrack verified on the RTX 5050 |
@@ -73,7 +90,18 @@ Then open **http://127.0.0.1:5173**. Full walkthrough with GPU checks, OCR, and 
 
 ---
 
-## What This Project Does
+## 🎬 Demo & Media
+
+| Resource | Description | Link |
+|---|---|---|
+| 🎥 Demo Video | End-to-end walkthrough of the console and local GPU pipeline | [Watch on Drive](https://drive.google.com/file/d/11qh_75hrGCSBG4pWCxIESvZaGnvrL5eZ/view?usp=sharing) |
+| 📊 Presentation Deck | Slide deck covering problem, approach, and architecture | [Open Slides](https://docs.google.com/presentation/d/1Zi-B_JZkmJHgAuOBxtf6LLU_IGVB-eGJ/edit?usp=sharing) |
+| 🏗️ Architecture Diagram | System components and how they connect | [View Diagram](https://drive.google.com/file/d/1nrD-DDg8B0l6VsbmORWePDYjxfkrXb83/view?usp=sharing) |
+| 🔁 Workflow Diagram | Detection-to-alert data flow | [View Diagram](https://drive.google.com/file/d/1-8Fuz67P8k5qshe3ghGJ7oJeYxmLIZ-c/view?usp=sharing) |
+
+---
+
+## 🧠 What This Project Does
 
 Sentinel Command turns camera video into an operator-friendly incident picture:
 
@@ -101,7 +129,7 @@ Events, alerts, and movement routes
 Operations dashboard
 ```
 
-The system sends compact detection metadata to the API. It does not upload or publish raw video frames.
+The system sends compact detection metadata to the API. **It does not upload or publish raw video frames.**
 
 <details>
 <summary><strong>Example detection event (JSON)</strong></summary>
@@ -132,9 +160,9 @@ Detection -> watchlist match -> priority alert -> map event -> route history
 
 ---
 
-## Two Operating Modes
+## 🔀 Two Operating Modes
 
-### 1. Deployed Demonstration
+### 1️⃣ Deployed Demonstration
 
 ```text
 Browser
@@ -147,7 +175,7 @@ Open: **[sentinel-gujarat.vercel.app](https://sentinel-gujarat.vercel.app)**
 
 This mode is designed for a stable presentation. It works without your laptop, private credentials, GPU, or camera gateway.
 
-### 2. Local Live-AI Mode
+### 2️⃣ Local Live-AI Mode
 
 ```text
 Camera gateway
@@ -165,7 +193,7 @@ This mode is the technically meaningful version. It uses the local GPU and is re
 
 ---
 
-## Use the Local Model
+## ⚙️ Use the Local Model
 
 <details>
 <summary><strong>Start the local API</strong></summary>
@@ -286,7 +314,7 @@ The virtual environment itself does not run in the background after VS Code clos
 
 ---
 
-## Camera Feed Configuration
+## 📹 Camera Feed Configuration
 
 Camera streams are provided by the organizer in three formats — HLS, RTSP, and WHEP — keyed by camera ID (`cam01` through `cam30`).
 
@@ -302,7 +330,7 @@ Full field-by-field configuration steps are in the [Integration Runbook](docs/IN
 
 ---
 
-## Why the Live Website May Not Show Real Cameras
+## ❓ Why the Live Website May Not Show Real Cameras
 
 The public dashboard and the live camera gateway are separate services.
 
@@ -318,7 +346,7 @@ No code redesign should be needed for that recovery. If the organizer changes au
 
 ---
 
-## API Surface
+## 🔌 API Surface
 
 | Method | Endpoint | Purpose |
 |---|---|---|
@@ -337,7 +365,7 @@ Interactive API documentation is available at **http://127.0.0.1:8000/docs** whe
 
 ---
 
-## Verification
+## ✅ Verification
 
 Run the backend tests:
 
@@ -364,7 +392,7 @@ The repository currently has tests for:
 
 ---
 
-## Project Layout
+## 🗂️ Project Layout
 
 ```text
 backend/
@@ -389,7 +417,7 @@ frontend/
 
 ---
 
-## Security Rules
+## 🔐 Security Rules
 
 - Keep `.env` on the laptop only.
 - Never paste passwords, tokens, RTSP URLs, or session cookies into chat.
@@ -400,13 +428,21 @@ frontend/
 
 ---
 
-## Documentation
+## 📖 Documentation
 
 - [Online deployment guide](docs/ONLINE_DEPLOYMENT.md)
 - [Live integration runbook](docs/INTEGRATION_RUNBOOK.md)
 - [Contributing guide](CONTRIBUTING.md)
 - [Changelog](CHANGELOG.md)
 
-## License
+## 📄 License
 
 This project is provided for the Sentinel Gujarat challenge. See [LICENSE](LICENSE).
+
+<div align="center">
+
+---
+
+Built with ⚡ FastAPI, ⚛️ React, and 🎮 CUDA — for the Sentinel Gujarat Challenge.
+
+</div>
